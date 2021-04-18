@@ -3,23 +3,23 @@
 #   Test Package:              'Ctrl + Shift + T'
 
 library(dplyr) #Cargar paquete, si no está cargado desde antes.
-CEP_csv  <- read.csv2("C:\\Users\\milax\\Documents\\!Crono_November_2020\\Data base\\ActualDatabase.csv")
 
+CEP_csv  <- read.csv("C:\\Users\\Mila\\Documents\\R-projects\\!Crono\\data_base\\SelectedDatabase.csv");
 
-waterGibbsFreeEnergy<- function(Tk,Pbar,p) numeric();
-Born<- function( w, charge, Tk, Pbar, gH2O,  eTP)numeric();
-SolvFunc <- function(p, TC, Pbar)numeric(); 
-waterDensity<- function(Tk,Pbar,p) numeric();
-GasGibbsFreeEnergy<- function(Gas,Tk,p) numeric();
+waterGibbsFreeEnergy<- function(Tk,Pbar,p) 
+Born<- function( w, charge, Tk, Pbar, gH2O,  eTP)
+SolvFunc <- function(p, TC, Pbar) 
+waterDensity<- function(Tk,Pbar,p)
+GasGibbsFreeEnergy<- function(Gas,Tk,Pbar)
 GasGibbsFreeEnergyUncertainty<- function(Gas, Tk,Pbar)
 AqGibbsFreeEnergyUncertainty<- function(Aq, Tk, Pbar)
 AqGibbsFreeEnergy<- function(Aq,Tk, Pbar, gH2O,  eTP)
-MinGibbsFreeEnergyUncertainty<- function(Min, Tk) 
+MinGibbsFreeEnergyUncertainty<- function(Min, Tk,T0) 
 MinGibbsFreeEnergy<- function(Min,Tk,T0,Pbar)
 DielConst<- function(p, TC, Tk, Pbar) 
 
   
-MinGibbsFreeEnergyUncertainty <- function(Min, Tk)    #Calculates uncertainties of minerals
+MinGibbsFreeEnergyUncertainty <- function(Min, Tk,T0)    #Calculates uncertainties of minerals
 {
   oG<-0;
   oS<-0; 
@@ -37,18 +37,20 @@ MinGibbsFreeEnergyUncertainty <- function(Min, Tk)    #Calculates uncertainties 
   else 
   {
     if ( !(is.na( CEP$SD..cal.mol.1)))
-  {oG<-CEP$SD..cal.mol.1}else {oG<-0;} 
+  {
+      oG<-as.numeric(CEP$SD..cal.mol.1);
+    }else {oG<-0;} 
     if ( !(is.na(CEP$S..cal.mol.1..K.1)) )
-   {oS<-CEP$SD..cal.mol.1..K.1} else {oS<-0;}
+   {oS<-as.numeric(CEP$SD..cal.mol.1..K.1);} else {oS<-0;}
     if( !(is.na(CEP$SD..cm3.mol.1)))
-   {oV<-CEP$SD..cm3.mol.1} else {oV<-0;}
+   {oV<-as.numeric(CEP$SD..cm3.mol.1)} else {oV<-0;}
     if (!(is.na(CEP$SD..cal.mol.1..K.1.1)))
-    {oa<-CEP$SD..cal.mol.1..K.1.1} else {oa<-0;}
+    {oa<-as.numeric(CEP$SD..cal.mol.1..K.1)} else {oa<-0;}
     if (!(is.na(CEP$SD.1000..cal.mol.1..K.1)))
-    {ob<-CEP$SD.1000..cal.mol.1..K.1} else {ob<-0;}
+    {ob<-as.numeric(CEP$SD.1000..cal.mol.1..K.1)} else {ob<-0;}
     if (!(is.na(CEP$SD.1000..cal.mol.1..K.1)))
-    {oc<-CEP$SD.10.5..cal.mol.1..K.1} else {oc<-0;}
-    Result<-sqrt( (oG^2)+ (oS*(Tk-T0)^2)+ (oa*(Tk-T0-Tk*log(Tk/T0))^2)+ (-ob/1000*(Tk-T0)*(Tk-T0)/2^2)+ (oc*100000*(Tk-T0)*(Tk-T0)/2/T0/T0/Tk^2)+ (oV*(Pbar-1)/41.84^2)); 
+    {oc<-as.numeric(CEP$SD.10.5..cal.mol.1..K.1);} else {oc<-0;}
+    Result<-sqrt (oG^2) + (oS*(Tk-T0)^2)+ (oa*(Tk-T0-Tk));#*log(Tk/T0))^2) ; #+ (-ob/1000*(Tk-T0)*(Tk-T0)/2^2)+ (oc*100000*(Tk-T0)*(Tk-T0)/2/T0/T0/Tk^2)+ (oV*(Pbar-1)/41.84^2)); 
     
   }
   
@@ -56,11 +58,14 @@ MinGibbsFreeEnergyUncertainty <- function(Min, Tk)    #Calculates uncertainties 
 }
 
  waterDensity <- function(Tk, Pbar)          #Calculates a density ofwater in g/cm3
-{
-   #from CronoMF
-   dyn.load ('okawsp6.dll');
-   wspDPT <- function (P, T)as.double; 
+{  
+    dyn.load("C:\\Users\\Mila\\Documents\\R-projects\\!Crono\\okawsp6.dll",TRUE,TRUE);
+   #from CronoMF 
+ #  dyn.load("C:\\Users\\Mila\\Documents\\Rprojects\\Crono\\okawsp6.dll",TRUE,TRUE);
+ #  wspDPT <- function (P, T)as.double; 
 
+   
+   
   if (Pbar<=1000) 
   {
     Result<- wspDPT(Pbar*1E+5, Tk)/1000;
@@ -92,9 +97,11 @@ cg_2 = -0.18632;          #         Sue et al., 2002 (p. 3304)
 cg_3 = 0.11531;           #         Sue et al., 2002 (p. 3304)
 
 p_a<-p/ waterDensity(T0,1);
+p_a<-1;
+
 if (p_a>1 )
 { 
-p_a<-1;                                         #//Need to avoid the calculation collapse at T>25°C and provide some minor error on the Born function
+p_a<-1;                                         #//Need T0 avoid the calculation collapse at T>25°C and provide some minor error on the Born function
 ag<-ag_i+ag_ii*TC+ag_iii*TC*TC;                               #//Shock et al., 1992 (Eq. 25, p. 807)
 bg<-bg_i+bg_ii*TC+bg_iii*TC*TC;                               #//Shock et al., 1992 (Eq. 26, p. 807)
 g<-ag* (1-p_a^ bg);  
@@ -110,7 +117,7 @@ g<-g-( ((TC-155)/300^ 4.8)+ag_1* ((TC-155)/300^ 16))*(ag_2* (1000-Pbar^3)+ag_3* 
 }
 else
 {
-  g<-g-(cg_1*p_a+cg_2* (p_a^2)+cg_3*log(p_a));             #Sue et al., 2002 (Eq. 25, p. 3304) - valid at T - from 250 to 600°C, Pbar - from 223 to 998 bar, ρ - from 0.20 to 0.81 g cm-3 (p. 3303)
+  g<-g-(cg_1*p_a+cg_2* (p_a^2)+cg_3*log(p_a));             #Sue et al., 2002 (Eq. 25, p. 3304) - valid at T - from 250 T0 600°C, Pbar - from 223 T0 998 bar, ρ - from 0.20 T0 0.81 g cm-3 (p. 3303)
 }
  
    
@@ -160,15 +167,11 @@ DielConst <- function(p, TC, Tk, Pbar)                      #//Dielectric consta
 
 
 
-MinGibbsFreeEnergy <- function(Min,Tk,T0,Pbar)  
+ MinGibbsFreeEnergy <- function(Min,Tk,T0,Pbar)  
 { 
 
- 
-  CEP_csv  <- read.csv2("C:\\Users\\milax\\Documents\\!Crono_November_2020\\Data base\\ActualDatabase.csv")
-  library(dplyr) #Cargar paquete, si no está cargado desde antes.
-
-CEP <-filter(CEP_csv, Name == Min)
-View(CEP) #Visualización de la base
+CEP <- dplyr::filter(CEP_csv, Name == Min);
+#View(CEP) #Visualización de la base
 
 G<-as.numeric(CEP$G..cal.mol.1);
 S<- as.numeric(CEP$SD..cal.mol.1);
@@ -177,9 +180,11 @@ S<- as.numeric(CEP$SD..cal.mol.1);
 V<- as.numeric(CEP$S..cal.mol.1..K.1);
 
 a<- as.numeric(CEP$SD..cal.mol.1..K.1);
-b<- as.double(CEP$V..cm3.mol.1); 
-c<- as.numeric(CEP$SD..cm3.mol.1);
 
+
+b<- as.numeric(CEP$V..cm3.mol.1); 
+c<- as.numeric(CEP$SD..cm3.mol.1);  
+           
 A<-10;
 B<-40;
 
@@ -188,7 +193,7 @@ Result <- G-S*(Tk-T0)+A*(Tk-T0-Tk*log10(Tk/T0))-(c*100000+B/1000*T0*T0*Tk)*(Tk-T
 } 
 
 #other functions
- waterGibbsFreeEnergy<- function(Tk,Pbar,p) #Calculates the Gibbs energy ofwater from triple point Ptr and Ttr to 10 kbar and 1273.15 °k (Helgeson and kirkham, 1974; Hill, 1990; Johnson and Norton, 1991; Han, 2008)
+ waterGibbsFreeEnergy<- function(Tk,Pbar,p) #Calculates the Gibbs energy ofwater from triple point Ptr and Ttr T0 10 kbar and 1273.15 °k (Helgeson and kirkham, 1974; Hill, 1990; Johnson and NorT0n, 1991; Han, 2008)
 { 
    
 
@@ -250,9 +255,9 @@ A4<-matrix(0, nrow = 5, ncol = 10);
 
 #const
 MH2O <- 18.015268;
-Tcr <- 647.067; # {°k}      #critical temperature ofwater from (Johnson and Norton, 1991),  Tcr = 647.096°k in http://en. wikipedia.org/ wiki/Critical_point_(thermodynamics)
+Tcr <- 647.067; # {°k}      #critical temperature ofwater from (Johnson and NorT0n, 1991),  Tcr = 647.096°k in http://en. wikipedia.org/ wiki/Critical_point_(thermodynamics)
 Ttr <- 273.16;  # {°k}      #temperature at the triple point
-pcr <- 0.322778; #{g/cm3}   #critical density ofwater, Johnson and Norton, 1991
+pcr <- 0.322778; #{g/cm3}   #critical density ofwater, Johnson and NorT0n, 1991
 e0 <- 1.028667;    #Hill, 1990 (p. 1235)
 Dp0 <- 0.23;       #Hill, 1990 (p. 1235)
 DT0 <- 0.05;       #Hill, 1990 (p. 1235)
@@ -266,9 +271,9 @@ C<- list(c(7.07501275112,-8.34240569963,-0.364601380,-0.036897043,0.003033815,0.
 
 C001 = -0.000034631815;      #Hill, 1990 (p. 1235)
 C002 = -0.000030378112;      #Hill, 1990 (p. 1235)
-GH2Otr = -56290;  # {cal/mol}     #Johnson and Norton, 1991
-HH2Otr = -68767;  # {cal/mol}     #Johnson and Norton, 1991
-SH2Otr = 15.132;   #{cal/mol}     #Johnson and Norton, 1991
+GH2Otr = -56290;  # {cal/mol}     #Johnson and NorT0n, 1991
+HH2Otr = -68767;  # {cal/mol}     #Johnson and NorT0n, 1991
+SH2Otr = 15.132;   #{cal/mol}     #Johnson and NorT0n, 1991
 #begin
 p <- p  /pcr;         # {g/cm3}       #Hill, 1990 (p. 1235, Appendix C, p. 1272)
 
@@ -334,7 +339,7 @@ if (!(F==0))
  
     Fh<-as.complex(-4/e0*exp(-1/Z)*(1/Z+1/Z/Z)*(log10(1+Z)^(3/4)));         #Hill, 1990 (Appendix E, p. 1274)  
 
-    Fp<-as.complex(Fh*Dp/h/Dp0/Dp0);        #as complex to prevent posible errors    #Hill, 1990 (Appendix E, p. 1274)
+    Fp<-as.complex(Fh*Dp/h/Dp0/Dp0);        #as complex T0 prevent posible errors    #Hill, 1990 (Appendix E, p. 1274)
     FT<-as.complex(Fh*DT/h/DT0/DT0);                                  
 }              #Han, 2008 (p. 360, 402)
       #Hill, 1990 (Appendix E, p. 1274)
@@ -353,7 +358,7 @@ k0T<-k0T-i*(2-i)*(-T^1-i);
 }
                                              #Hill, 1990 (Appendix D, p. 1273)}
 
-C_Num<-as.numeric(unlist(C)); #Convert the array to numeric
+C_Num<-as.numeric(unlist(C)); #Convert the array T0 numeric
 k0<-(C_Num[7]*T+C_Num[8])*log10(-T);               #Hill, 1990 (Appendix A,D, pp. 1271,1273)
 k0T<-(k0T+C_Num[7])*(1+log10(-T))+C_Num[8]/T;           #Hill, 1990 (Appendix D, p. 1273)
  w1<-0;
@@ -541,7 +546,7 @@ for (I in 1:length(5))
 
 k1<- w1+E* w2+G* w3+H* w4;                                       #the "far-field" Helmholtz function, Hill, 1990 (p. 1236, Appendix D, p. 1272)
 
-kf<-log10(p)+(k0+k1+F*Dkn);         #adicional () to prevent errors when k1 is inf                           #Helmholtz function, Hill, 1990 (p. 1235, Appendix D, p. 1272)
+kf<-log10(p)+(k0+k1+F*Dkn);         #adicional () T0 prevent errors when k1 is inf                           #Helmholtz function, Hill, 1990 (p. 1235, Appendix D, p. 1272)
 
 k<-kf*Tk*Rcal;    #  {cal/mol}   #Helmholtz free energy ofwater, Hill, 1990 (p. 1235)
 
@@ -557,9 +562,9 @@ if(Gp==-Inf||G==-Inf)  #case Gp or G is Inf
 {k0p<--Inf;}
 kT<-k0T+ w1T+E* w2T+GT* w3+G* w3T+HT* w4+H* w4T+FT*Dkn+F*DkT;         #Hill, 1990 (Appendix D, p. 1273)
 
-HH2O<-k+Rcal*Tcr*(-kT-p/T*k0p)+HH2Otr;   #{cal/mol}                #Enthalpy ofwater, Johnson and Norton, 1991 (p. 586)
+HH2O<-k+Rcal*Tcr*(-kT-p/T*k0p)+HH2Otr;   #{cal/mol}                #Enthalpy ofwater, Johnson and NorT0n, 1991 (p. 586)
 
-SH2O<-Rcal*(T*kT)+SH2Otr;     #{cal/°k/mol}                          #Entropy ofwater, Johnson and Norton, 1991 (p. 586)
+SH2O<-Rcal*(T*kT)+SH2Otr;     #{cal/°k/mol}                          #Entropy ofwater, Johnson and NorT0n, 1991 (p. 586)
 
 
 Result<-HH2O-Tk*SH2O+GH2Otr-HH2Otr+Ttr*SH2Otr;# {cal/mol}        #Gibbs free energy ofwater, Helgeson and kirkham, 1974 (p. 1096)
@@ -579,7 +584,7 @@ Born<- function( w, charge, Tk, Pbar, gH2O,  eTP,T0)     #//Calculates the Gibbs
   
   if (!(charge==0))                         #//Born coefficient of the ion, Shock et al., 1992 (p. 803-805, Appendix D, p. 824)
   { 
-    re<-charge*charge/( w*100000/ n+charge/3.082);   #//Effective electroctatic radii of ions, 3.082 corresponds to the effective electrostatic radius of H+ at 1 bar and 298.15°k}
+    re<-charge*charge/( w*100000/ n+charge/3.082);   #//Effective electroctatic radii of ions, 3.082 corresponds T0 the effective electrostatic radius of H+ at 1 bar and 298.15°k}
   
   if (charge>0)                          #//Cations
   {
@@ -725,69 +730,69 @@ if(! ( CEP$Name == Aq))   #//Find existence of the aqueous species in the data b
 }
 else
  {
-  if (!(is.na( CEP[4])))
+  if (!(is.na( CEP$G..cal.mol.1)))
   {
-  oG<- as.numeric(CEP[4]) ;
+  oG<- as.numeric(CEP$G..cal.mol.1) ;
   } 
    else 
    {
     oG<-0;
     }
   
-  if (!(is.na( CEP[6])))
+  if (!(is.na( CEP$S..cal.mol.1..K.1)))
   {
-    oS<- as.numeric(CEP[6])  ;
+    oS<- as.numeric(CEP$S..cal.mol.1..K.1)  ;
   }
   else
   {
     oS<-0;
   }
 
-  if (!(is.na( CEP[10]) ))
+  if (!(is.na( CEP$a..cal.mol.1..K.1) ))
    { 
-    oa1<- as.numeric(CEP[10]);
+    oa1<- as.numeric(CEP$a..cal.mol.1..K.1);
    }
   else 
   {
     oa1<-0;
   }
-  if(!(is.na(CEP[12])) )  
+  if(!(is.na(CEP$b.1000..cal.mol.1..K.1)) )  
   {
-    oa2<- as.numeric(CEP[12]) ;
+    oa2<- as.numeric(CEP$b.1000..cal.mol.1..K.1) ;
     } 
   else
     {
     oa2<-0;
     }
-  if (!(is.na(CEP[14])) )
+  if (!(is.na(CEP$c.10.5..cal.mol.1..K.1)) )
   {
-    oa3<- as.numeric(CEP[14]) ;
+    oa3<- as.numeric(CEP$c.10.5..cal.mol.1..K.1) ;
    }
   else
   { 
   oa3<-0;
     }
    
-  if (!(is.na(CEP[16])) )
+  if (!(is.na(CEP$X)) )
  {
-    oa4<- as.numeric(CEP[16]) ;  
+    oa4<- as.numeric(CEP$X) ;  
     
   } 
   else 
   {
       oa4<-0;
   }
-  if(!(is.na(CEP[18])) ) 
+  if(!(is.na(CEP$X.2)) ) 
   {
-    oc1<- as.numeric(CEP[18]) ;
+    oc1<- as.numeric(CEP$X.2) ;
   } 
     else 
     {
     oc1<-0;
     }
-if (!(is.na(CEP[20])) )
+if (!(is.na(CEP$X.4)) )
   {
-    oc2<- as.numeric(CEP[20]) ;
+    oc2<- as.numeric(CEP$X.4) ;
     }
   else
   {
@@ -797,73 +802,37 @@ Result<-sqrt( (oG^2)+ (oS*(Tk-T0)^2)+ (oc1*(Tk-T0-Tk*log10(Tk/T0))^2)+ (oa1/10*(
 
  }
 }
- GasGibbsFreeEnergy<-function(Gas,Tk)                #//Calculates Gibbs Free energies of gas species
+ GasGibbsFreeEnergy<-function(Gas,Tk,Pbar)                #//Calculates Gibbs Free energies of gas species
  {
 
 
-   Tk<-2; 
+
    G<-0;
    S<-0;
    a<-0;
    b<-0
    c<-0;
-   CEP <-filter(CEP_csv, Name == Gas)
-   View(CEP) #Visualización de la base
-   if (!(CEP$Name == Gas))     #//Find existence of the gas in the data base
-   {
-     # print(Gas ,' is not found in the data base!');
-     Result<-0; 
-   } 
-   else
-    {
-       
-       if (!( is.na(CEP[4])) ) 
-     {
-       G<- as.numeric(CEP[4]) ;
-     }
-     else
-     {
-       G<-0;
-     }
-     if (!( is.na(CEP[6]) ) )
-     {
-       S<- as.numeric(CEP[6]) ;
-     }
-     else 
-     {
-       S<-0;
-     }
-     if (!( is.na(CEP[10]) ) )
-     {
-       a<- as.numeric(CEP[10]) ;
-     } 
-     else 
-     {
-       a<-0;
-     }
-     if (!( is.na(CEP[12]) ) )
-     {
-       b<- as.numeric(CEP[12]) ;
-     }
-     else 
-     {
-       b<-0;
-     }
-     if (!( is.na(CEP[14] ) ))
-     {
-       c<- as.numeric(CEP[14]) ;
-     } 
-     else
-     {
-       c<-0;
-     }
    
-    }
+   CEP <- dplyr::filter(CEP_csv, Name == Gas);
+   #View(CEP) #Visualización de la base
+   
+   
+
+   
+       G<- as.numeric(CEP$G..cal.mol.1) ;
+   S<- as.numeric(CEP$S..cal.mol.1..K.1) ;
+   a<- as.numeric(CEP$a..cal.mol.1..K.1) ;
+    b<- as.numeric(CEP$b.1000..cal.mol.1..K.1) ;
+    c<- as.numeric(CEP$c.10.5..cal.mol.1..K.1) ;
+    
+   
+    
    
     
       
    
    Result<-G-S*(Tk-T0)+a*(Tk-T0-Tk*log10(Tk/T0))-(c*100000+b/1000*T0*T0*Tk)*(Tk-T0)*(Tk-T0)/2/T0/T0/Tk;         #//Helgeson et al., 1978
+  
    end;
  }
 
@@ -878,8 +847,8 @@ GasGibbsFreeEnergyUncertainty<-function(Gas, Tk)       #//Calculates uncertainti
   T0<-2;
   
   library(dplyr) #Cargar paquete, si no está cargado desde antes.
-  CEP_csv  <- read.csv2("C:\\Users\\milax\\Documents\\!Crono_November_2020\\Data base\\ActualDatabase.csv")
-  CEP <-filter(CEP_csv, Name == Gas);
+
+  CEP <- dplyr::filter(CEP_csv, Name == Gas);  
 
  # as.numeric(CEP$SD..cal.mol.1);#[4]
   #as.numeric(CEP$SD..cal.mol.1..K.1);#[6]
@@ -892,42 +861,42 @@ GasGibbsFreeEnergyUncertainty<-function(Gas, Tk)       #//Calculates uncertainti
     }   #//Find existence of the mineral in the Data base
    else 
     {  
-    if (!(is.na(  as.numeric(CEP[4])) ))
+    if (!(is.na(  as.numeric(CEP$G..cal.mol.1)) ))
     {
-    oG<-as.numeric(CEP[4]);#[4];
+    oG<-as.numeric(CEP$G..cal.mol.1);#[4];
     } 
     else
     {
     oG<-0;
     } 
-    if (!(is.na( as.numeric(CEP[6])) ))
+    if (!(is.na( as.numeric(CEP$S..cal.mol.1..K.1)) ))
       {
-      oS<- as.numeric(CEP[6]);#[6]
+      oS<- as.numeric(CEP$S..cal.mol.1..K.1);#[6]
       }
       else
       {
         oS<-0;
       }
-    if (!(is.na(CEP[10]) ))
+    if (!(is.na(CEP$a..cal.mol.1..K.1) ))
       {
-      oa<- as.numeric(CEP[10]);
+      oa<- as.numeric(CEP$a..cal.mol.1..K.1);
        }
       else
       {
         oa<-0;
       }
        
-    if (!(is.na(CEP[12]) ))
+    if (!(is.na(CEP$b.1000..cal.mol.1..K.1) ))
       {
-      ob<- as.numeric(CEP[12]) ;
+      ob<- as.numeric(CEP$b.1000..cal.mol.1..K.1) ;
       } 
       else 
       {
         ob<-0;
       }  
-    if (!(is.na(CEP[14]) ))
+    if (!(is.na(CEP$c.10.5..cal.mol.1..K.1) ))
      {
-      oc<- as.numeric(CEP[14]); 
+      oc<- as.numeric(CEP$c.10.5..cal.mol.1..K.1); 
      }
       else
      {
