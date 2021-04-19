@@ -4,7 +4,7 @@
 
 library(dplyr) #Cargar paquete, si no estรก cargado desde antes.
 
-CEP_csv  <- read.csv("C:\\Users\\Mila\\Documents\\R-projects\\!Crono\\data_base\\SelectedDatabase.csv");
+CEP_csv  <- read.csv("C:\\Users\\Mila\\Documents\\R-projects\\!Crono\\data_base\\ActualDatabase.csv");
 
 waterGibbsFreeEnergy<- function(Tk,Pbar,p) 
 Born<- function( w, charge, Tk, Pbar, gH2O,  eTP)
@@ -40,16 +40,16 @@ MinGibbsFreeEnergyUncertainty <- function(Min, Tk,T0)    #Calculates uncertainti
   {
       oG<-as.numeric(CEP$SD..cal.mol.1);
     }else {oG<-0;} 
-    if ( !(is.na(CEP$S..cal.mol.1..K.1)) )
-   {oS<-as.numeric(CEP$SD..cal.mol.1..K.1);} else {oS<-0;}
-    if( !(is.na(CEP$SD..cm3.mol.1)))
-   {oV<-as.numeric(CEP$SD..cm3.mol.1)} else {oV<-0;}
-    if (!(is.na(CEP$SD..cal.mol.1..K.1.1)))
-    {oa<-as.numeric(CEP$SD..cal.mol.1..K.1)} else {oa<-0;}
-    if (!(is.na(CEP$SD.1000..cal.mol.1..K.1)))
-    {ob<-as.numeric(CEP$SD.1000..cal.mol.1..K.1)} else {ob<-0;}
-    if (!(is.na(CEP$SD.1000..cal.mol.1..K.1)))
-    {oc<-as.numeric(CEP$SD.10.5..cal.mol.1..K.1);} else {oc<-0;}
+    if ( !(is.na(CEP$S..cal.mol.1.ย.K.1)) )
+   {oS<-as.numeric(CEP$S..cal.mol.1.ย.K.1);} else {oS<-0;}
+    if( !(is.na(CEP$SD..cal.mol.1.ย.K.1)))
+   {oV<-as.numeric(CEP$SD..cal.mol.1.ย.K.1)} else {oV<-0;}
+    if (!(is.na(CEP$V..cm3.mol.1)))
+    {oa<-as.numeric(CEP$V..cm3.mol.1)} else {oa<-0;}
+    if (!(is.na(CEP$SD..cm3.mol.1)))
+    {ob<-as.numeric(CEP$SD..cm3.mol.1)} else {ob<-0;}
+    if (!(is.na(CEP$a..cal.mol.1.ย.K.1 )))
+    {oc<-as.numeric(CEP$a..cal.mol.1.ย.K.1 );} else {oc<-0;}
     Result<-sqrt (oG^2) + (oS*(Tk-T0)^2)+ (oa*(Tk-T0-Tk));#*log(Tk/T0))^2) ; #+ (-ob/1000*(Tk-T0)*(Tk-T0)/2^2)+ (oc*100000*(Tk-T0)*(Tk-T0)/2/T0/T0/Tk^2)+ (oV*(Pbar-1)/41.84^2)); 
     
   }
@@ -62,7 +62,7 @@ MinGibbsFreeEnergyUncertainty <- function(Min, Tk,T0)    #Calculates uncertainti
     dyn.load("C:\\Users\\Mila\\Documents\\R-projects\\!Crono\\okawsp6.dll",TRUE,TRUE);
    #from CronoMF 
  #  dyn.load("C:\\Users\\Mila\\Documents\\Rprojects\\Crono\\okawsp6.dll",TRUE,TRUE);
- #  wspDPT <- function (P, T)as.double; 
+    wspDPT <- function (P, T)as.double; 
 
    
    
@@ -174,12 +174,12 @@ CEP <- dplyr::filter(CEP_csv, Name == Min);
 #View(CEP) #Visualizaciรณn de la base
 
 G<-as.numeric(CEP$G..cal.mol.1);
-S<- as.numeric(CEP$SD..cal.mol.1);
+S<- as.numeric(SD..cal.mol.1);
 
 
-V<- as.numeric(CEP$S..cal.mol.1..K.1);
+V<- as.numeric(CEP$S..cal.mol.1.ย.K.1);
 
-a<- as.numeric(CEP$SD..cal.mol.1..K.1);
+a<- as.numeric(CEP$SD..cal.mol.1.ย.K.1);
 
 
 b<- as.numeric(CEP$V..cm3.mol.1); 
@@ -739,34 +739,34 @@ else
     oG<-0;
     }
   
-  if (!(is.na( CEP$S..cal.mol.1..K.1)))
+  if (!(is.na( CEP$S..cal.mol.1.ย.K.1)))
   {
-    oS<- as.numeric(CEP$S..cal.mol.1..K.1)  ;
+    oS<- as.numeric(CEP$S..cal.mol.1.ย.K.1)  ;
   }
   else
   {
     oS<-0;
   }
 
-  if (!(is.na( CEP$a..cal.mol.1..K.1) ))
+  if (!(is.na( CEP $a..cal.mol.1.ย.K.1 ) ))
    { 
-    oa1<- as.numeric(CEP$a..cal.mol.1..K.1);
+    oa1<- as.numeric(CEP $a..cal.mol.1.ย.K.1 );
    }
   else 
   {
     oa1<-0;
   }
-  if(!(is.na(CEP$b.1000..cal.mol.1..K.1)) )  
+  if(!(is.na(CEP $bย.1000..cal.mol.1.ย.K.1 )) )  
   {
-    oa2<- as.numeric(CEP$b.1000..cal.mol.1..K.1) ;
+    oa2<- as.numeric(CEP $bย.1000..cal.mol.1.ย.K.1 ) ;
     } 
   else
     {
     oa2<-0;
     }
-  if (!(is.na(CEP$c.10.5..cal.mol.1..K.1)) )
+  if (!(is.na(CEP $cย.10.5..cal.mol.1.ย.K.1)) )
   {
-    oa3<- as.numeric(CEP$c.10.5..cal.mol.1..K.1) ;
+    oa3<- as.numeric(CEP $cย.10.5..cal.mol.1.ย.K.1) ;
    }
   else
   { 
@@ -820,10 +820,10 @@ Result<-sqrt( (oG^2)+ (oS*(Tk-T0)^2)+ (oc1*(Tk-T0-Tk*log10(Tk/T0))^2)+ (oa1/10*(
 
    
        G<- as.numeric(CEP$G..cal.mol.1) ;
-   S<- as.numeric(CEP$S..cal.mol.1..K.1) ;
-   a<- as.numeric(CEP$a..cal.mol.1..K.1) ;
-    b<- as.numeric(CEP$b.1000..cal.mol.1..K.1) ;
-    c<- as.numeric(CEP$c.10.5..cal.mol.1..K.1) ;
+   S<- as.numeric(CEP$S..cal.mol.1.ย.K.1) ;
+   a<- as.numeric(CEP $a..cal.mol.1.ย.K.1 ) ;
+    b<- as.numeric(CEP $bย.1000..cal.mol.1.ย.K.1 ) ;
+    c<- as.numeric(CEP $cย.10.5..cal.mol.1.ย.K.1) ;
     
    
     
@@ -850,9 +850,9 @@ GasGibbsFreeEnergyUncertainty<-function(Gas, Tk)       #//Calculates uncertainti
 
   CEP <- dplyr::filter(CEP_csv, Name == Gas);  
 
- # as.numeric(CEP$SD..cal.mol.1);#[4]
-  #as.numeric(CEP$SD..cal.mol.1..K.1);#[6]
-  #as.numeric(CEP$SD..cal.mol.1..K.1.1);#[10]
+ # as.numeric(SD..cal.mol.1);#[4]
+  #as.numeric(CEP$SD..cal.mol.1.ย.K.1);#[6]
+  #as.numeric(CEP$SD..cal.mol.1.ย.K.1.1);#[10]
   #as.numeric(CEP$SD.1000..cal.mol.1..K.1);#[12]
   #as.numeric(CEP$SD.10.5..cal.mol.1..K.1);#[14]
   if(is.na( CEP$Name == Gas))
@@ -869,34 +869,34 @@ GasGibbsFreeEnergyUncertainty<-function(Gas, Tk)       #//Calculates uncertainti
     {
     oG<-0;
     } 
-    if (!(is.na( as.numeric(CEP$S..cal.mol.1..K.1)) ))
+    if (!(is.na( as.numeric(CEP$S..cal.mol.1.ย.K.1)) ))
       {
-      oS<- as.numeric(CEP$S..cal.mol.1..K.1);#[6]
+      oS<- as.numeric(CEP$S..cal.mol.1.ย.K.1);#[6]
       }
       else
       {
         oS<-0;
       }
-    if (!(is.na(CEP$a..cal.mol.1..K.1) ))
+    if (!(is.na(CEP $a..cal.mol.1.ย.K.1 ) ))
       {
-      oa<- as.numeric(CEP$a..cal.mol.1..K.1);
+      oa<- as.numeric(CEP $a..cal.mol.1.ย.K.1 );
        }
       else
       {
         oa<-0;
       }
        
-    if (!(is.na(CEP$b.1000..cal.mol.1..K.1) ))
+    if (!(is.na(CEP $bย.1000..cal.mol.1.ย.K.1 ) ))
       {
-      ob<- as.numeric(CEP$b.1000..cal.mol.1..K.1) ;
+      ob<- as.numeric(CEP $bย.1000..cal.mol.1.ย.K.1 ) ;
       } 
       else 
       {
         ob<-0;
       }  
-    if (!(is.na(CEP$c.10.5..cal.mol.1..K.1) ))
+    if (!(is.na(CEP $cย.10.5..cal.mol.1.ย.K.1) ))
      {
-      oc<- as.numeric(CEP$c.10.5..cal.mol.1..K.1); 
+      oc<- as.numeric(CEP $cย.10.5..cal.mol.1.ย.K.1); 
      }
       else
      {
